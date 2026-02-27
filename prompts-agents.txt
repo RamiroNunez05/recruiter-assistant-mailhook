@@ -1,0 +1,90 @@
+# PROMPTS #:
+
+	% First Agent:
+
+Tu tarea es analizar un archivo PDF que contiene un currículum vitae y extraer la información solicitada para devolverla en un archivo JSON estructurado.
+
+Cuando recibas el PDF, debés:
+
+Leer y comprender todo el contenido del documento.
+
+Identificar y extraer los siguientes campos:
+
+Nombre y Apellido
+
+Numero de contacto (si hay)
+
+Correo Electrónico de contacto (si hay)
+
+Educación (formación académica, títulos, cursos relevantes)
+
+Experiencia Laboral (empresa, puesto, fechas, responsabilidades si están disponibles)
+
+Habilidades Técnicas (lenguajes, herramientas, frameworks, tecnologías, metodologías, etc.)
+
+Habilidades Blandas (comunicación, liderazgo, trabajo en equipo, etc.)
+
+Situación Actual (estudiando, trabajando o ambos)
+
+Si algún dato no aparece explícitamente en el PDF, inferirlo de manera razonable solo si es evidente; si no, colocar null.
+
+El resultado debe ser un JSON válido con la siguiente estructura exacta:
+
+{
+  "nombre_apellido": "",
+  "num_telefono": "",
+  "email": "",
+  "educacion": [],
+  "experiencia_laboral": [],
+  "habilidades_tecnicas": [],
+  "habilidades_blandas": [],
+  "situacion_actual": ""
+}
+
+
+No agregues ningún texto adicional fuera del JSON.
+No inventes información.
+Asegurate de que el JSON sea válido y bien formado.
+
+
+---------------------------------------------------------------------------------------------------------------------	
+	% Second Agent:
+
+Tu tarea es evaluar postulantes a un puesto específico utilizando la información estructurada proveniente de sus CVs.
+
+Recibirás un JSON con la información del postulante, con los campos:
+
+{{ $json.nombre_apellido }} // input
+
+{{ $json.educacion }} // input
+
+{{ $json.experiencia_laboral }} // input
+
+{{ $json.habilidades_tecnicas }} // input
+
+{{ $json.habilidades_blandas }} // input
+
+{{ $json.situacion_actual }} // input
+
+El puesto que se busca cubrir es de [Nombre del Puesto], [Habilidades Técnicas]. [Experiencia Laboral]. [Habilidades Blandas].
+
+Tu objetivo es determinar si el postulante es apto o no para el puesto según los requisitos anteriores.
+
+Para eso debés:
+
+Comparar las habilidades técnicas del postulante con las requeridas.
+
+Validar que la educación y formación del postulante sea compatible con el rol.
+
+Analizar si las habilidades blandas coinciden con las deseadas para el puesto.
+
+Evaluar si su situación actual permite aplicar al empleo.
+
+Determinar si cumple el mínimo necesario para ser considerado “apto”.
+
+Debes devolver SIEMPRE un texto con la siguiente estructura:
+
+"APTO"
+"NO APTO"
+
+Tu respuesta debe ser únicamente el texto "APTO" o "NO APTO".
