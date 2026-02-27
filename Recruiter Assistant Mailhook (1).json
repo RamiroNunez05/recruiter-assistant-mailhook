@@ -1,0 +1,1492 @@
+{
+  "name": "Recruiter Assistant Mailhook",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Se recibe el mail de postulacion\n\n",
+        "height": 336,
+        "width": 246,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5568,
+        -2640
+      ],
+      "typeVersion": 1,
+      "id": "4f1e9b23-5925-4e24-b6c9-ef287944d9a6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## El Agente lee el Curriculum vitae recibido",
+        "height": 320,
+        "width": 358,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4896,
+        -2640
+      ],
+      "typeVersion": 1,
+      "id": "8febe568-b385-45f2-bdf0-500b069411cf",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtenemos el texto crudo que viene de Gemini\nconst rawText = $input.first().json.candidates[0].content.parts[0].text;\n\n// Limpiamos posibles bloques de código markdown (```json ... ```) si la IA los incluyó\nconst cleanedText = rawText.replace(/```json|```/g, \"\").trim();\n\ntry {\n  // Convertimos el texto en un objeto JSON real\n  const parsedJson = JSON.parse(cleanedText);\n  \n  // Devolvemos el objeto para que los siguientes nodos puedan usarlo\n  return parsedJson;\n} catch (error) {\n  // Si falla el parseo, devolvemos un error descriptivo\n  return { \n    error: \"No se pudo parsear el JSON\", \n    raw: rawText \n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4240,
+        -2544
+      ],
+      "id": "44f83751-439a-450b-a1e2-ab9cdd5b9515",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "## Transforma la respuesta tipo texto a formato json",
+        "height": 320,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4320,
+        -2672
+      ],
+      "typeVersion": 1,
+      "id": "4f8133f3-4457-4c50-b1b8-39a8492c07cf",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -4256,
+        -2112
+      ],
+      "id": "6d2504f1-d31d-4283-8b75-34540f95c12a",
+      "name": "Stop and Error",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n## La API de Gemini no pudo establecer conexión y se envia una alerta al soporte técnico",
+        "height": 272,
+        "width": 582,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4368,
+        -2128
+      ],
+      "typeVersion": 1,
+      "id": "27655aaa-c1fe-4bd6-ba32-365d6589cba7",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Tu tarea es evaluar postulantes a un puesto específico utilizando la información estructurada proveniente de sus CVs.\n\nRecibirás un JSON con la información del postulante, con los campos:\n\n{{ $json.nombre_apellido }}\n\n{{ $json.educacion }}\n\n{{ $json.experiencia_laboral }}\n\n{{ $json.habilidades_tecnicas }}\n\n{{ $json.habilidades_blandas }}\n\n{{ $json.situacion_actual }}\n\nEl puesto que se busca cubrir es de Programador Junior especializado en automatizaciones y flujos de trabajo con agentes de IA, deberá tener conocimientos en herramientas como n8n o make, ademas de tecnologias como webhooks, API REST, headers, tokens, Javascript y Node.js . No es necesario experiencia laboral previa. Además de un buen razonamiento lógico y atención al detalle.\n\nTu objetivo es determinar si el postulante es apto o no para el puesto según los requisitos anteriores.\n\nPara eso debés:\n\nComparar las habilidades técnicas del postulante con las requeridas.\n\nValidar que la educación y formación del postulante sea compatible con el rol.\n\nAnalizar si las habilidades blandas coinciden con las deseadas para el puesto.\n\nEvaluar si su situación actual permite aplicar al empleo.\n\nDeterminar si cumple el mínimo necesario para ser considerado “apto”.\n\nDebés devolver SIEMPRE un texto con la siguiente estructura:\n\n\"APTO\"\n\"NO APTO\"\n\nTu respuesta debe ser únicamente el texto \"APTO\" o \"NO APTO\"."
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -3904,
+        -2544
+      ],
+      "id": "94659b45-d965-4612-aa6c-c662131f6149",
+      "name": "Message a model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kZcrBT76e1UX0Nve",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "548c04a8-aed1-4837-8456-a981848352d8",
+              "leftValue": "={{ $json.content.parts[0].text }}",
+              "rightValue": "\"APTO\"",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3200,
+        -2560
+      ],
+      "id": "535a2ed1-cbbf-4c9d-9a6f-ff80c58c4f5f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code in JavaScript').item.json.email }}",
+        "subject": "Postulación Programador Junior",
+        "emailType": "text",
+        "message": "Desafortunadamente en esta ocasión no pudiste pasar a la instancia de entrevista pero recuerda mantener actualizado tu CV para futuras postulaciones! ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2592,
+        -2032
+      ],
+      "id": "12aa3b63-a5a2-478b-8420-867889e78282",
+      "name": "Send a message",
+      "webhookId": "44782a45-04c9-4624-97a7-e7364f40ee75",
+      "retryOnFail": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IMYwcVAVGRwGLqql",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Se compara APTO con el json que envie el Agente",
+        "height": 304,
+        "width": 262,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3280,
+        -2704
+      ],
+      "typeVersion": 1,
+      "id": "95de0f99-5e06-4f27-9612-68516aa3b90e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n## Se envia un mail notificando que no pudo sr seleccionado en esta ocasion",
+        "height": 320,
+        "width": 310
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2704,
+        -2048
+      ],
+      "typeVersion": 1,
+      "id": "afd023e3-1661-448c-b49a-dded6a4153d3",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Se actualiza la lista de entrevistados con sus datos de contacto",
+        "height": 304,
+        "width": 294,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2688,
+        -2704
+      ],
+      "typeVersion": 1,
+      "id": "913f0b7b-9236-4da9-8d89-795678e1d210",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## El Agente compara para ver si es apto para la entrevista",
+        "height": 304,
+        "width": 358,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3968,
+        -2672
+      ],
+      "typeVersion": 1,
+      "id": "7d67b5c8-8719-40ad-ad80-de1f4cf2da2a",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "=Tu tarea es analizar un archivo PDF que contiene un currículum vitae y extraer la información solicitada para devolverla en un archivo JSON estructurado.\n\nCuando recibas el PDF, debés:\n\nLeer y comprender todo el contenido del documento.\n\nIdentificar y extraer los siguientes campos:\n\nNombre y Apellido\n\nNumero de contacto (si hay)\n\nCorreo Electrónico de contacto (si hay)\n\nEducación (formación académica, títulos, cursos relevantes)\n\nExperiencia Laboral (empresa, puesto, fechas, responsabilidades si están disponibles)\n\nHabilidades Técnicas (lenguajes, herramientas, frameworks, tecnologías, metodologías, etc.)\n\nHabilidades Blandas (comunicación, liderazgo, trabajo en equipo, etc.)\n\nSituación Actual (estudiando, trabajando o ambos)\n\nSi algún dato no aparece explícitamente en el PDF, inferirlo de manera razonable solo si es evidente; si no, colocar null.\n\nEl resultado debe ser un JSON válido con la siguiente estructura exacta:\n\n{\n  \"nombre_apellido\": \"\",\n  \"num_telefono\": \"\",\n  \"email\": \"\",\n  \"educacion\": [],\n  \"experiencia_laboral\": [],\n  \"habilidades_tecnicas\": [],\n  \"habilidades_blandas\": [],\n  \"situacion_actual\": \"\"\n}\n\n\nNo agregues ningún texto adicional fuera del JSON.\nNo inventes información.\nAsegurate de que el JSON sea válido y bien formado.",
+        "inputType": "binary",
+        "binaryPropertyName": "attachment_0",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -4768,
+        -2528
+      ],
+      "id": "c3840f17-85cb-4d7e-96e2-da262fd1721c",
+      "name": "Analyze document",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true,
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kZcrBT76e1UX0Nve",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1BoS1EMMxzeNeODx_gL42eTRBibL1zxOP4Ck6y-2bOVw/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BoS1EMMxzeNeODx_gL42eTRBibL1zxOP4Ck6y-2bOVw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $('Code in JavaScript').item.json.nombre_apellido }}",
+            "experiencia-lab": "={{ $('Code in JavaScript').item.json.experiencia_laboral }}",
+            "educacion": "={{ $('Code in JavaScript').item.json.educacion }}",
+            "habilidades-tec": "={{ $('Code in JavaScript').item.json.habilidades_tecnicas }}",
+            "habilidades-blandas": "={{ $('Code in JavaScript').item.json.habilidades_blandas }}",
+            "correo": "={{ $('Code in JavaScript').item.json.email }}",
+            "num-telefono": "={{ $('Code in JavaScript').item.json.num_telefono }}",
+            "CV": "="
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "correo",
+              "displayName": "correo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "num-telefono",
+              "displayName": "num-telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experiencia-lab",
+              "displayName": "experiencia-lab",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "educacion",
+              "displayName": "educacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "habilidades-blandas",
+              "displayName": "habilidades-blandas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "habilidades-tec",
+              "displayName": "habilidades-tec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CV",
+              "displayName": "CV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2592,
+        -2576
+      ],
+      "id": "c6dd7114-7f29-4d5a-9ec4-f5bda9365fc6",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "At2Wugx42FbJeY0I",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -3424,
+        -2112
+      ],
+      "id": "c3101e3a-fcf7-4a78-be59-7efa98490dc1",
+      "name": "Stop and Error1",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n## La API de Gemini no pudo establecer conexión y se envia una alerta al soporte técnico",
+        "height": 272,
+        "width": 582,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3536,
+        -2128
+      ],
+      "typeVersion": 1,
+      "id": "6f7eac90-ed51-4ed8-b288-0dc642a0fa33",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error}}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -2064,
+        -2160
+      ],
+      "id": "00a727a5-d9f7-47cf-ac03-c54466894799",
+      "name": "Stop and Error2",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n## La API de Sheets no pudo establecer conexión y se envia una alerta al soporte técnico",
+        "height": 272,
+        "width": 582,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2176,
+        -2176
+      ],
+      "typeVersion": 1,
+      "id": "6db42c58-8321-4302-8c46-959c674e1f3e",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "=subject:\"BOCA JUNIORS\""
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -5488,
+        -2512
+      ],
+      "id": "8ac8618d-b893-4d42-bf6f-9707272b95e3",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IMYwcVAVGRwGLqql",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "58121b5c-8274-4268-81fb-94f14cebd432",
+              "leftValue": "={{ $binary.attachment_0.fileName }}",
+              "rightValue": ".pdf",
+              "operator": {
+                "type": "string",
+                "operation": "endsWith"
+              }
+            },
+            {
+              "id": "0c2d1013-ca8c-4fb7-a296-9cf6eed52d0a",
+              "leftValue": "={{ $binary.attachment_1.fileName }}",
+              "rightValue": ".pdf",
+              "operator": {
+                "type": "string",
+                "operation": "endsWith"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -5168,
+        -2512
+      ],
+      "id": "67d2da26-8eb7-4ab1-8786-eab380813d88",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "content": "## Filtra que el mail contenga un archivo pdf",
+        "height": 336,
+        "width": 272,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5248,
+        -2640
+      ],
+      "typeVersion": 1,
+      "id": "92963fb5-8449-487b-a65b-57f72cbce5d6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+        "subject": "Postulación Programador Junior",
+        "emailType": "text",
+        "message": "Lo sentimos, el sistema solo acepta Curriculums Vitae en formato PDF, por favor ¡Reenvie su postulación!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -4784,
+        -1664
+      ],
+      "id": "5664408d-47a7-4bf7-a7a4-55e1e16cf608",
+      "name": "Send a message4",
+      "webhookId": "7b621ed2-e44a-48b1-906f-71f4b0f01a73",
+      "retryOnFail": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IMYwcVAVGRwGLqql",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n## Se envia un mail notificando que el sistema solo acepta CVs en formato PDF",
+        "height": 320,
+        "width": 358
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4896,
+        -1696
+      ],
+      "typeVersion": 1,
+      "id": "0ce2faaa-a973-45ea-bfa5-ca9f5fb93eac",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Se guardan todos los CVs Aptos",
+        "height": 304,
+        "width": 336,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2208,
+        -2704
+      ],
+      "typeVersion": 1,
+      "id": "b1d69e31-71ff-4cb2-90a8-9707a00e0719",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ $('Gmail Trigger').item.binary.attachment_0 }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1NQmGTRhm37vzi8tnHakfw8mr371FGbVS",
+          "mode": "list",
+          "cachedResultName": "Almacen CVs",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1NQmGTRhm37vzi8tnHakfw8mr371FGbVS"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2096,
+        -2592
+      ],
+      "id": "d3a8f407-3fec-44d7-aebf-188afc73171a",
+      "name": "Upload file",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "f4ks1xHzQRP772Z1",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Gmail Trigger').item.json.to.value[0].address }}",
+            "nombre": "={{ $('Gmail Trigger').item.json.to.value[0].name }}",
+            "fecha_hora": "={{ $now }}",
+            "Estado": "=ERROR en la API de Gemini - {{ $json.error }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3984,
+        -2112
+      ],
+      "id": "ebb74a63-f40a-42c0-b763-8d1c7e31cba7",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "At2Wugx42FbJeY0I",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Gmail Trigger').item.json.to.value[0].address }}",
+            "nombre": "={{ $('Gmail Trigger').item.json.to.value[0].name }}",
+            "fecha_hora": "={{ $now }}",
+            "Estado": "=ERROR en la API de Gemini - {{ $json.error }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3168,
+        -2112
+      ],
+      "id": "bc334271-f8ea-4420-a41d-1f694e58b6d5",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "At2Wugx42FbJeY0I",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Gmail Trigger').item.json.to.value[0].address }}",
+            "nombre": "={{ $('Gmail Trigger').item.json.to.value[0].name }}",
+            "fecha_hora": "={{ $now }}",
+            "Estado": "=ERROR en la API de Sheets - {{ $json.error }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1792,
+        -2160
+      ],
+      "id": "e1ee66c3-c1cf-4512-a88e-bf70d6252bbd",
+      "name": "Append row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "At2Wugx42FbJeY0I",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -2064,
+        -1760
+      ],
+      "id": "55518bd7-95a3-4218-9a1b-5dc8337f6ba3",
+      "name": "Stop and Error3",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n## La API de Gmail no pudo establecer conexión y se envia una alerta al soporte técnico",
+        "height": 272,
+        "width": 582,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2176,
+        -1776
+      ],
+      "typeVersion": 1,
+      "id": "909632ca-7b13-4587-add3-b84c4919a52e",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Gmail Trigger').item.json.to.value[0].address }}",
+            "nombre": "={{ $('Gmail Trigger').item.json.to.value[0].name }}",
+            "fecha_hora": "={{ $now }}",
+            "Estado": "=ERROR en la API de Gmail - {{ $json.error }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1792,
+        -1760
+      ],
+      "id": "d6cde3a7-9682-441e-a805-8e139f097445",
+      "name": "Append row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "At2Wugx42FbJeY0I",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -4256,
+        -1648
+      ],
+      "id": "3b6be842-f40a-4171-b968-4a9011a01a1b",
+      "name": "Stop and Error4",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n## La API de Gmail no pudo establecer conexión y se envia una alerta al soporte técnico",
+        "height": 272,
+        "width": 582,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4368,
+        -1664
+      ],
+      "typeVersion": 1,
+      "id": "99144a8a-e0e6-46f8-990c-2671507cd821",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Gmail Trigger').item.json.to.value[0].address }}",
+            "nombre": "={{ $('Gmail Trigger').item.json.to.value[0].name }}",
+            "fecha_hora": "={{ $now }}",
+            "Estado": "=ERROR en la API de Gmail - {{ $json.error }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3984,
+        -1648
+      ],
+      "id": "676e4ab0-56ed-481a-a284-8496a1fc1286",
+      "name": "Append row in sheet5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "At2Wugx42FbJeY0I",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        -2576
+      ],
+      "id": "d03343ad-55c7-4fdb-8f83-2859d66bc5dd",
+      "name": "Stop and Error5",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n## La API de Drive no pudo establecer conexión y se envia una alerta al soporte técnico",
+        "height": 272,
+        "width": 582,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1600,
+        -2592
+      ],
+      "typeVersion": 1,
+      "id": "1aebe711-f9bf-44c3-b5d8-a33e3cfe252e",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nr1D8rbewJZQIXmpUEh8OGLMDhniMx4YOF8PfuoYL2Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Gmail Trigger').item.json.to.value[0].address }}",
+            "nombre": "={{ $('Gmail Trigger').item.json.to.value[0].name }}",
+            "fecha_hora": "={{ $now }}",
+            "Estado": "=ERROR en la API de Drive - {{ $json.error }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1216,
+        -2576
+      ],
+      "id": "c194cccf-5056-4abc-a239-7f9f7560379e",
+      "name": "Append row in sheet6",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "At2Wugx42FbJeY0I",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop and Error": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop and Error1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop and Error2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Analyze document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop and Error3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Stop and Error3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop and Error4": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message4": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Stop and Error4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop and Error5": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Stop and Error5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timezone": "America/Argentina/Buenos_Aires",
+    "saveExecutionProgress": true,
+    "timeSavedPerExecution": 15
+  },
+  "versionId": "3267406d-ae5f-4db3-98b4-0e6dec35636e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "123981d150810e1d86e0d5df739e816b92770b3d01491ec595be132e4e12b102"
+  },
+  "id": "mkO62hroW2p3ss7C",
+  "tags": []
+}
