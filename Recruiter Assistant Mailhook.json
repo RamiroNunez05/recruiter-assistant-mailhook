@@ -478,7 +478,7 @@
         },
         "simple": false,
         "filters": {
-          "q": "=subject:\"BOCA JUNIORS\""
+          "q": "=subject:\"HERE_YOU_CHOOSE\""
         },
         "options": {
           "downloadAttachments": true
